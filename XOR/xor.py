@@ -17,21 +17,19 @@ XOR_Y = [[0],[1],[1],[0]]
 
 # 1. with no parameters
 with tf.variable_scope("hidden_layer") as scope:
-    w1 = tf.constant([[1, 1],[1, 1]], shape=[2, 2], dtype=tf.float32)
-    b1 = tf.constant([0, -1], shape=[2,], dtype=tf.float32)
-    x_ = tf.nn.relu(tf.add(tf.matmul(x, w1), b1))
+    w = tf.constant([[1., 1.],[1., 1.]], shape=[2, 2])
+    b = tf.constant([0., -1.], shape=[2,])
+    x_ = tf.nn.relu(tf.add(tf.matmul(x, w), b))
 
 with tf.variable_scope("output") as scope:
-    w2 = tf.constant([[1], [-2]], shape=[2, 1], dtype=tf.float32)
-    b2 = tf.constant([0], shape=[1,], dtype=tf.float32)
-    y_ = tf.add(tf.matmul(x_, w2), b2)
+    w = tf.constant([[1.], [-2.]], shape=[2, 1])
+    b = tf.constant([0.], shape=[1,])
+    y_ = tf.add(tf.matmul(x_, w), b)
     
 loss = tf.reduce_mean(tf.square(y - y_))
-# init = tf.global_variables_initializer()
 
 with tf.Session() as sess:
-    # sess.run(init)
-    x, pred, l = sess.run([x_, y_, loss], feed_dict={x: XOR_X, y: XOR_Y})
+    pred, l = sess.run([y_, loss], feed_dict={x: XOR_X, y: XOR_Y})
     print(f"XOR problem:  mse={l}, y prediction: \n{pred}")      
 
 
