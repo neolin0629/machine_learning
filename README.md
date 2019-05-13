@@ -28,3 +28,4 @@ learning project for machine learning
    * 关于rnn和lstm：
      * 参考文献：https://machinelearningmastery.com/how-to-develop-lstm-models-for-multi-step-time-series-forecasting-of-household-power-consumption/
      * 课题：a) 基础rnn和lstm； b) cnn-lstm: 用cnn抽取特征，用lstm建立模型。
+
