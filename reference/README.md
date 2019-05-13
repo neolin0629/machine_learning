@@ -13,8 +13,6 @@
 
 ## Deep Learning (DL)
 
-* Computation_Graph.ipynb
-
 * thesis-augmented.pdf 
 
   > 陈丹琦的thesis
