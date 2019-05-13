@@ -2,8 +2,12 @@
 
 [TOC]
 
+**深度前馈网络**(Deep feedforward network)，也叫作**前馈神经网络**(feedforward neural network)或者**多层感知机**(multilayer perceptron, MLP)，是典型的深度学习模型。当前馈神经网络被扩展成包含反馈连接时，它们被称为**循环神经网络**(recurrent neural network)。
+
+## XOR
+
 **损失函数(loss function)**
-为了简化用到的数学，使用均方误差损失函数。
+为了简化用到的数学，使用均方误差损失函数。(XOR)
 $$
 J(θ)=\frac{1}{4}\underset{x\in X}{\sum}(f^*(x)-f(x;\Theta))^2
 $$
