@@ -61,11 +61,73 @@ Organizing the data into standard weeks.
 
 epochs: 20, batch_size: 4, optimizer:Adam (implementation of stochastic gradient descent)
 
+loss function: MSE, evaluation: RMSE
+
 #### Structure of model
 
-| Layer   | Output | Shape | Params |
-| ------- | ------ | ----- | ------ |
-| input_1 | input  |       |        |
+**conv1d**： filters: 16 , kernel_size: 3, strides: 1
+
+**maxpooling1d**：pool_size: 2
+
+**dense1**：units: 10
+
+**dense2**：units: 7
+
+| Layer        | Shape            | Params |
+| ------------ | ---------------- | ------ |
+| input_1      | (None, 7 ,1)     | 0      |
+| conv1d       | (None, 5, 1, 16) | 49     |
+| maxpooling1d | (None, 4, 1, 16) | 0      |
+| flatten      | (None, 64)       | 0      |
+| dense1       | (None, 10)       | 650    |
+| dense2       | (None, 7)        | 77     |
+
+**improve** : change [n_input] from 7 to 14
+
+### Multi-step Time Series Forecasting With a Multichannel CNN
+
+#### Hyperparameter
+
+epochs: 70, batch_size: 16, optimizer:Adam (implementation of stochastic gradient descent)
+
+loss function: MSE, evaluation: RMSE
+
+> * The increase in the amount of data requires a larger and more sophisticated model that is trained for longer.
+>
+> * batch_size: 在计算梯度下降的时候，使用多少个样本。
+>   * 较大的batch_size在决定下降的方向时越准确，但是消耗内存，并且由于不同batch的采样差异性，可能导致梯度修正值互相抵消，无法修正（梯度消失）。(批梯度下降，Batch gradient descent)
+>   * 较小的batch_size能够带来更好的泛化误差，计算速度快，但是收敛性能不好。（随机梯度下降，stochastic gradient descent）
+>   * 当batch_size设置为2的次幂时能够充分利用矩阵运算
+
+#### Structure of model
+
+**conv1d_1**： filters: 32 , kernel_size: 3, strides: 1
+
+**conv1d_2**： filters: 32 , kernel_size: 3, strides: 1
+
+**maxpooling1d_1**：pool_size: 2
+
+**conv1d_3**： filters: 16 , kernel_size: 3, strides: 1
+
+**maxpooling1d_2**：pool_size: 2
+
+**dense1**：units: 100
+
+**dense2**：units: 7
+
+| Layer          | Shape             | Params |
+| -------------- | ----------------- | ------ |
+| input_1        | (None, 14, 8)     | 0      |
+| conv1d_1       | (None, 12, 8, 32) | 800    |
+| conv1d_2       | (None, 10, 8, 32) | 800    |
+| maxpooling1d_1 | (None, 9, 8, 32)  | 0      |
+| conv1d_3       | (None, 7, 8, 16)  | 400    |
+| maxpooling1d_2 | (None, 6, 8, 16)  | 0      |
+| flatten        | (None, 768)       | 0      |
+| dense1         | (None, 100)       | 76900  |
+| dense2         | (None, 7)         | 707    |
+
+### Multi-step Time Series Forecasting With a Multihead CNN
 
 
 

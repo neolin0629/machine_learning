@@ -1,4 +1,4 @@
-# univariate multi-step cnn
+# multichannel multi-step cnn
 from math import sqrt
 from numpy import split
 from numpy import array
@@ -57,9 +57,7 @@ def to_supervised(train, n_input, n_out=7):
 		out_end = in_end + n_out
 		# ensure we have enough data for this instance
 		if out_end < len(data):
-			x_input = data[in_start:in_end, 0]
-			x_input = x_input.reshape((len(x_input), 1))
-			X.append(x_input)
+			X.append(data[in_start:in_end, :])
 			y.append(data[in_end:out_end, 0])
 		# move along one time step
 		in_start += 1
@@ -70,14 +68,17 @@ def build_model(train, n_input):
 	# prepare data
 	train_x, train_y = to_supervised(train, n_input)
 	# define parameters
-	verbose, epochs, batch_size = 0, 20, 4
+	verbose, epochs, batch_size = 0, 70, 16
 	n_timesteps, n_features, n_outputs = train_x.shape[1], train_x.shape[2], train_y.shape[1]
 	# define model
 	model = Sequential()
-	model.add(Conv1D(filters=16, kernel_size=3, activation='relu', input_shape=(n_timesteps,n_features)))
+	model.add(Conv1D(filters=32, kernel_size=3, activation='relu', input_shape=(n_timesteps,n_features)))
+	model.add(Conv1D(filters=32, kernel_size=3, activation='relu'))
+	model.add(MaxPooling1D(pool_size=2))
+	model.add(Conv1D(filters=16, kernel_size=3, activation='relu'))
 	model.add(MaxPooling1D(pool_size=2))
 	model.add(Flatten())
-	model.add(Dense(10, activation='relu'))
+	model.add(Dense(100, activation='relu'))
 	model.add(Dense(n_outputs))
 	model.compile(loss='mse', optimizer='adam')
 	# fit network
@@ -90,9 +91,9 @@ def forecast(model, history, n_input):
 	data = array(history)
 	data = data.reshape((data.shape[0]*data.shape[1], data.shape[2]))
 	# retrieve last observations for input data
-	input_x = data[-n_input:, 0]
-	# reshape into [1, n_input, 1]
-	input_x = input_x.reshape((1, len(input_x), 1))
+	input_x = data[-n_input:, :]
+	# reshape into [1, n_input, n]
+	input_x = input_x.reshape((1, input_x.shape[0], input_x.shape[1]))
 	# forecast the next week
 	yhat = model.predict(input_x, verbose=0)
 	# we only want the vector forecast
@@ -124,7 +125,7 @@ dataset = read_csv('household_power_consumption_days.csv', header=0, infer_datet
 # split into train and test
 train, test = split_dataset(dataset.values)
 # evaluate model and get scores
-n_input = 7
+n_input = 14
 score, scores = evaluate_model(train, test, n_input)
 # summarize scores
 summarize_scores('cnn', score, scores)
