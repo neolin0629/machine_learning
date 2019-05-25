@@ -129,6 +129,12 @@ loss function: MSE, evaluation: RMSE
 
 ### Multi-step Time Series Forecasting With a Multihead CNN
 
+**Advantage:**
+
+Can use different kernel sizes on the same data – much like a ResNet type design.
+
+## LSTM Models for Multi-Step Time Series Forecasting 
+
 
 
 ## Reference
@@ -136,4 +142,8 @@ loss function: MSE, evaluation: RMSE
 [How to Develop Convolutional Neural Networks for Multi-Step Time Series Forecasting](https://machinelearningmastery.com/how-to-develop-convolutional-neural-networks-for-multi-step-time-series-forecasting/)
 
 [How To Backtest Machine Learning Models for Time Series Forecasting](https://machinelearningmastery.com/backtest-machine-learning-models-time-series-forecasting/)
+
+[How to Develop LSTM Models for Time Series Forecasting](https://machinelearningmastery.com/how-to-develop-lstm-models-for-time-series-forecasting/)
+
+[How to Develop LSTM Models for Multi-Step Time Series Forecasting of Household Power Consumption](https://machinelearningmastery.com/how-to-develop-lstm-models-for-multi-step-time-series-forecasting-of-household-power-consumption/)
 
