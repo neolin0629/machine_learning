@@ -4,6 +4,7 @@
 
 RNN（Recurrent Neural Network）是一类用于处理序列数据的神经网络。基础的神经网络只在层与层之间建立了权连接，RNN最大的不同之处就是在层之间的神经元之间也建立的权连接。
 这是一个标准的RNN结构图，图中每个箭头代表做一次变换，也就是说箭头连接带有权值。左侧是循环图，右侧是展开图，左侧中h旁边的黑色方块表示每个时间步。 
+
 ![](pics\c10_rnn_unfolding.png)
 
 > 图中O代表输出，y代表样本给出的确定值，L代表损失函数，“损失”也是随着序列的推进而不断积累的。 
@@ -44,23 +45,20 @@ RNN中一些重要的设计模式包括以下几种：
 ### Encoder-Decoder结构
 
 Encoder-Decoder，也可以称之为Seq2Seq结构，该架构输入和输出的长度可以不同。具体过程如下：
-
 1. 编码器(encoder)或读取器(reader)或输入(input)RNN处理输入序列，编码器输出上下文C(通常是最终隐藏状态h(nx)的简单函数)
 2. 解码器(decoder)或写入器(writer)或输出(output)RNN则以固定长度的向量(如图10.9)为条件产生输出序列Y=(y(1), . . . , y(ny))
 
-如果C是一个向量，则decoder是一个向量到序列的RNN。这时，向量的输入有两种方式，这两种方式也可以结合
 
+如果C是一个向量，则decoder是一个向量到序列的RNN。这时，向量的输入有两种方式，这两种方式也可以结合
 1. 作为RNN的初始状态
    ![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/encoder_decoder.jpg)
 2. 连接到每个时间步的隐藏单元
    ![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/encoder_decoder_connect_2_t.jpg)
 
 ### 导师驱动过程（teacher forcing）
-
 Teacher Forcing是一种用来训练循环神经网络模型的方法，这种方法以上一时刻的输出作为下一时刻的输入。该方法最初是作为BPTT的替代技术的。这种类型的模型在语言模型中很常见，即使用正确的单词作为输入的一部分去预测下一个单词。
 
 #### 原理
-
 训练模型时，导师驱动过程不再使用最大似然准则，而在时刻t + 1接收真实值y(t)作为输入。条件最大似然准则是：
 ![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/c10_rnn_probability_fomula.png)
 
@@ -76,18 +74,16 @@ Teacher Forcing是一种用来训练循环神经网络模型的方法，这种�
 如上图所示：训练时，我们将训练集中正确的输出y(t)反馈到h(t+1)。当模型部署后，真正的输出通常是未知的。在这种情况下，我们用模型的输出o(t)近似正确的输出y(t)，并反馈回模型。
 
 #### 改进
-
 如果之后神经网络在开环(open-loop)模式下使用，即测试集中出现了训练集中不存在的数据时，模型的效果会不好。改进的方法有如下几种：
-
 1. 搜索候选输出序列。在预测的是离散值时，通常可以使用集束搜索(beam search)。比如在预测单词这种离散值的输出时，一种常用方法是对词表中每一个单词的预测概率执行搜索，生成多个候选的输出序列。
 2. 当模型预测的是实值(real-valued)而不是离散值(discrete value)时，使用课程学习策略(Curriculum Learning)，即使用一个概率p去选择使用ground truth的输出y(t)还是前一个时间步骤模型生成的输出o(t)作为当前时间步骤的输入。这个概率p会随着时间的推移而改变，这就是所谓的计划抽样(scheduled sampling)，训练过程会从force learning开始，逐步使用更多生成值作为输入。
 
 ## RNN的训练方法（BPTT）
-
 **BPTT(back-propagation through time)**算法是常用的训练RNN的方法，其实本质还是BP算法，只不过RNN处理时间序列数据，所以要基于时间反向传播，故叫**通过时间反向传播**。BPTT的中心思想和BP算法相同，沿着需要优化的参数的负梯度方向不断寻找更优的点直至收敛。综上所述，BPTT算法本质还是BP算法，BP算法本质还是梯度下降法，那么求各个参数的梯度便成了此算法的核心。
 
 根据上面的更新方程，每个节点的参数有U,V,W,b和c，以及以t为索引的节点序列x(t),h(t),o(t)和L(t)。每个参数的梯度计算公式如下：
 <img src="pics\BPTT_gradient_fomula.png" width="70%" height="70%"/>
+
 ### 梯度消失和梯度爆炸
 参考：[RNN梯度消失和爆炸的原因](https://zhuanlan.zhihu.com/p/28687529)
 
@@ -145,6 +141,7 @@ sigmoid函数的导数范围是(0,0.25]，tanh函数的导数范围是(0,1]，�
 机器学习领域有个很重要的假设：IID(independent and identically distributed)独立同分布假设，就是假设训练数据和测试数据是满足相同分布的，这是通过训练数据获得的模型能够在测试集获得好的效果的一个基本保障。那BN的作用是什么呢？BN就是在深度神经网络训练过程中使得每一层神经网络的输入保持相同分布的。
 
 BN是基于mini-batch SGD(小批量随机梯度下降)的优化。
+
 ##### 1. Internal Covariate Shift问题
 covariate shift的概念：如果ML系统实例集合<X,Y>中的输入值X的分布老是变，这不符合IID假设，网络模型很难稳定的学规律。在训练过程中，因为各层参数不停在变化，所以每个隐层都会面临covariate shift的问题，这就是所谓的"Internal Covariate Shift"。
 
@@ -153,10 +150,12 @@ covariate shift的概念：如果ML系统实例集合<X,Y>中的输入值X的分
 
 举几个例子：
 sigmoid作为激活函数
+
 <img src="pics\BN_sigmoid.png" width="50%" height="50%"/>
 <img src="pics\BN_sigmoid_2.png" width="50%" height="50%"/>
 
 relu作为激活函数
+
 <img src="pics\BN_relu.jpg" width="50%" height="50%"/>
 
 ##### 3. BN的做法
