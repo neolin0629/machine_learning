@@ -1,7 +1,11 @@
 # RNN
+
+[TOC]
+
 RNN（Recurrent Neural Network）是一类用于处理序列数据的神经网络。基础的神经网络只在层与层之间建立了权连接，RNN最大的不同之处就是在层之间的神经元之间也建立的权连接。
 这是一个标准的RNN结构图，图中每个箭头代表做一次变换，也就是说箭头连接带有权值。左侧是循环图，右侧是展开图，左侧中h旁边的黑色方块表示每个时间步。 
 ![](pics\c10_rnn_unfolding.png)
+
 > 图中O代表输出，y代表样本给出的确定值，L代表损失函数，“损失”也是随着序列的推进而不断积累的。 
 > 从t=1到t=n的每个时间步，**更新方程**如下
 > ![](pics\c10_rnn_formula.png)
@@ -12,27 +16,75 @@ RNN（Recurrent Neural Network）是一类用于处理序列数据的神经网�
 ![](pics\c10_rnn_unfold_formula.png)
 2. 可以在每个时间步使用相同参数的相同转移函数f，且权值共享，图中的W全是相同的，U和V也一样。 
 
-## 经典的RNN结构
-经典的RNN结构
-![](pics\diags.jpeg)
+## RNN的不同逻辑结构
+
+### 经典的RNN结构
+![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/diags.jpeg)
+
 > 1. image classification
 > 2. image captioning takes an image and outputs a sentence of words
 > 3. sentiment analysis where a given sentence is classified as expressing positive or negative sentiment
 > 4. Machine Translation: an RNN reads a sentence in English and then outputs a sentence in French
 > 5. Synced sequence input and output(e.g. video classification where we wish to label each frame of the video). 
 
-## Encoder-Decoder结构
+RNN中一些重要的设计模式包括以下几种：
+
+1. 每个时间步都有输出，并且隐藏单元之间有循环连接的循环网络，如经典的RNN结构
+2. 每个时间步都产生一个输出，只有当前时刻的输出到下个时刻的隐藏单元之间有循环连接的循环网络，如下图1
+3. 隐藏单元之间存在循环连接，但读取整个序列后产生单个输出的循环网络，如下图2
+   图1：
+   ![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/c10_rnn_o2h_recurrent.png)
+
+特点**：循环链接是从输出o到隐藏层h。没有h到h的模型强大(只能表示更小的函数集合)。o作为输出，除非维度很高，否则会损失一部分h的信息。没有直接的循环链接，而只是间接的将h信息传递到下一层。但其易于训练，可以并行化训练(使用标注y^t替换o^t而作为传递到后面的信息，这样就不再需要先计算前一时间步的隐藏状态，再计算后一步的隐藏状态，因此所有计算都能并行化)。
+
+图2：
+![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/c10_rnn_n_1.png)
+
+**特点**：先读取整个序列，然后再产生单个输出，循环连接存在于隐藏单元之间。这种架构常用于阅读理解等序列模型。这种架构只在最后一个隐藏单元输出观察值并给出预测，它可以概括序列并产生用于进一步运算的向量，例如在编码器解码器架构中，它可用于编码整个序列并抽取上下文向量。
+
+### Encoder-Decoder结构
+
 Encoder-Decoder，也可以称之为Seq2Seq结构，该架构输入和输出的长度可以不同。具体过程如下：
+
 1. 编码器(encoder)或读取器(reader)或输入(input)RNN处理输入序列，编码器输出上下文C(通常是最终隐藏状态h(nx)的简单函数)
 2. 解码器(decoder)或写入器(writer)或输出(output)RNN则以固定长度的向量(如图10.9)为条件产生输出序列Y=(y(1), . . . , y(ny))
 
 如果C是一个向量，则decoder是一个向量到序列的RNN。这时，向量的输入有两种方式，这两种方式也可以结合
+
 1. 作为RNN的初始状态
-![](pics\encoder_decoder.jpg)
+   ![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/encoder_decoder.jpg)
 2. 连接到每个时间步的隐藏单元
-![](pics\encoder_decoder_connect_2_t.jpg)
+   ![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/encoder_decoder_connect_2_t.jpg)
+
+### 导师驱动过程（teacher forcing）
+
+Teacher Forcing是一种用来训练循环神经网络模型的方法，这种方法以上一时刻的输出作为下一时刻的输入。该方法最初是作为BPTT的替代技术的。这种类型的模型在语言模型中很常见，即使用正确的单词作为输入的一部分去预测下一个单词。
+
+#### 原理
+
+训练模型时，导师驱动过程不再使用最大似然准则，而在时刻t + 1接收真实值y(t)作为输入。条件最大似然准则是：
+![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/c10_rnn_probability_fomula.png)
+
+只考虑两个时间步的序列。取对数后：
+![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/c10_tforce_likelihood.png)
+
+在这个例子中，同时给定迄今为止的x序列和来自训练集的前一y值，我们可以看到在时刻t = 2时，模型被训练为最大化y(2)的条件概率。因此最大似然在训练时指定正确反馈，而不是将自己的输出反馈到模型。
+
+#### 应用
+
+![](E:/machine-learning/machine_learning/Code%20of%20DL%20book/pics/c10_rnn_teacher.png)
+
+如上图所示：训练时，我们将训练集中正确的输出y(t)反馈到h(t+1)。当模型部署后，真正的输出通常是未知的。在这种情况下，我们用模型的输出o(t)近似正确的输出y(t)，并反馈回模型。
+
+#### 改进
+
+如果之后神经网络在开环(open-loop)模式下使用，即测试集中出现了训练集中不存在的数据时，模型的效果会不好。改进的方法有如下几种：
+
+1. 搜索候选输出序列。在预测的是离散值时，通常可以使用集束搜索(beam search)。比如在预测单词这种离散值的输出时，一种常用方法是对词表中每一个单词的预测概率执行搜索，生成多个候选的输出序列。
+2. 当模型预测的是实值(real-valued)而不是离散值(discrete value)时，使用课程学习策略(Curriculum Learning)，即使用一个概率p去选择使用ground truth的输出y(t)还是前一个时间步骤模型生成的输出o(t)作为当前时间步骤的输入。这个概率p会随着时间的推移而改变，这就是所谓的计划抽样(scheduled sampling)，训练过程会从force learning开始，逐步使用更多生成值作为输入。
 
 ## RNN的训练方法（BPTT）
+
 **BPTT(back-propagation through time)**算法是常用的训练RNN的方法，其实本质还是BP算法，只不过RNN处理时间序列数据，所以要基于时间反向传播，故叫**通过时间反向传播**。BPTT的中心思想和BP算法相同，沿着需要优化的参数的负梯度方向不断寻找更优的点直至收敛。综上所述，BPTT算法本质还是BP算法，BP算法本质还是梯度下降法，那么求各个参数的梯度便成了此算法的核心。
 
 根据上面的更新方程，每个节点的参数有U,V,W,b和c，以及以t为索引的节点序列x(t),h(t),o(t)和L(t)。每个参数的梯度计算公式如下：(*)
@@ -116,43 +168,6 @@ relu作为激活函数
 1. 极大提升了训练速度，收敛过程大大加快
 2. 增加分类效果，一种解释是这是类似于Dropout的一种防止过拟合的正则化表达方式，所以不用Dropout也能达到相当的效果
 3. 调参过程简单，对于初始化要求没那么高，而且可以使用大的学习率(learning rate)等
-
-## RNN的不同逻辑结构
-RNN中一些重要的设计模式包括以下几种：
-1. 每个时间步都有输出，并且隐藏单元之间有循环连接的循环网络，如经典的RNN结构
-2. 每个时间步都产生一个输出，只有当前时刻的输出到下个时刻的隐藏单元之间有循环连接的循环网络，如下图1
-3. 隐藏单元之间存在循环连接，但读取整个序列后产生单个输出的循环网络，如下图2
-图1：
-![](pics\c10_rnn_o2h_recurrent.png)
-
-特点**：循环链接是从输出o到隐藏层h。没有h到h的模型强大(只能表示更小的函数集合)。o作为输出，除非维度很高，否则会损失一部分h的信息。没有直接的循环链接，而只是间接的将h信息传递到下一层。但其易于训练，可以并行化训练(使用标注y^t替换o^t而作为传递到后面的信息，这样就不再需要先计算前一时间步的隐藏状态，再计算后一步的隐藏状态，因此所有计算都能并行化)。
-
-图2：
-![](pics\c10_rnn_n_1.png)
-
-**特点**：先读取整个序列，然后再产生单个输出，循环连接存在于隐藏单元之间。这种架构常用于阅读理解等序列模型。这种架构只在最后一个隐藏单元输出观察值并给出预测，它可以概括序列并产生用于进一步运算的向量，例如在编码器解码器架构中，它可用于编码整个序列并抽取上下文向量。
-
-### 导师驱动过程（teacher forcing）
-Teacher Forcing是一种用来训练循环神经网络模型的方法，这种方法以上一时刻的输出作为下一时刻的输入。该方法最初是作为BPTT的替代技术的。这种类型的模型在语言模型中很常见，即使用正确的单词作为输入的一部分去预测下一个单词。
-
-#### 原理
-训练模型时，导师驱动过程不再使用最大似然准则，而在时刻t + 1接收真实值y(t)作为输入。条件最大似然准则是：
-![](pics\c10_rnn_probability_fomula.png)
-
-只考虑两个时间步的序列。取对数后：
-![](pics\c10_tforce_likelihood.png)
-
-在这个例子中，同时给定迄今为止的x序列和来自训练集的前一y值，我们可以看到在时刻t = 2时，模型被训练为最大化y(2)的条件概率。因此最大似然在训练时指定正确反馈，而不是将自己的输出反馈到模型。
-
-#### 应用
-![](pics\c10_rnn_teacher.png)
-
-如上图所示：训练时，我们将训练集中正确的输出y(t)反馈到h(t+1)。当模型部署后，真正的输出通常是未知的。在这种情况下，我们用模型的输出o(t)近似正确的输出y(t)，并反馈回模型。
-
-#### 改进
-如果之后神经网络在开环(open-loop)模式下使用，即测试集中出现了训练集中不存在的数据时，模型的效果会不好。改进的方法有如下几种：
-1. 搜索候选输出序列。在预测的是离散值时，通常可以使用集束搜索(beam search)。比如在预测单词这种离散值的输出时，一种常用方法是对词表中每一个单词的预测概率执行搜索，生成多个候选的输出序列。
-2. 当模型预测的是实值(real-valued)而不是离散值(discrete value)时，使用课程学习策略(Curriculum Learning)，即使用一个概率p去选择使用ground truth的输出y(t)还是前一个时间步骤模型生成的输出o(t)作为当前时间步骤的输入。这个概率p会随着时间的推移而改变，这就是所谓的计划抽样(scheduled sampling)，训练过程会从force learning开始，逐步使用更多生成值作为输入。
 
 ## Reference
 
