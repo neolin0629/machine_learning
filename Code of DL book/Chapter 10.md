@@ -22,11 +22,11 @@
 
 典型的RNN展开图：
 
-![](.\pics\c10_rnn_unfolding.png)
+![](pics\c10_rnn_unfolding.png)
 
 从t=1到t=n的每个时间步，**更新方程**如下：
 
-![](.\pics\c10_rnn_formula.png)
+![](pics\c10_rnn_formula.png)
 
 ### 导师驱动过程和输出循环网络
 
@@ -55,13 +55,13 @@
 
 对任意分布y建模的方法如下：在时刻 t 的输出到时刻 t + 1 的隐藏单元添加连接。
 
-![](.\pics\c10_any_distribution.png)
+![](pics\c10_any_distribution.png)
 
 ## 双向RNN（Bidirectional RNNs）
 
 双向 RNN 结合时间上从序列起点开始移动的 RNN 和另一个时间上从序列末尾开始移动的 RNN。
 
-![](E:\machine-learning\machine_learning\Code of DL book\pics\c10_Bidirectional_RNNs.png)
+![](pics\c10_Bidirectional_RNNs.png)
 
 ## 基于编码-解码的序列到序列的架构
 
@@ -87,7 +87,7 @@
 
 递归神经网络代表循环网络的另一个扩展，它被构造为深的树状结构而不是RNN的链状结构，因此是不同类型的计算图。
 
-![c10_recursive_net](.\pics\c10_recursive_net.png)
+![](pics\c10_recursive_net.png)
 
 ## 长期依赖的挑战
 
@@ -123,37 +123,37 @@ ESN和流体状态机都被称为储层计算（reservoir computing）(Lukoševi
 
 LSTM除了外部的RNN循环外，还有内部的循环（自环）。
 
-![c10_lstm](.\pics\c10_lstm.png)
+![](pics\c10_lstm.png)
 
 LSTM遗忘门状态更新：
 
-![](.\pics\c10_lstm_fg.png)
+![](pics\c10_lstm_fg.png)
 
 内部状态更新(state)：
 
-![](.\pics\c10_lstm_internal_state.png)
+![](pics\c10_lstm_internal_state.png)
 
 外部输入门 (external input gate) 单元g(t)以类似遗忘门(使用sigmoid获得0~1之间的值)的方式更新，但有自身的参数：
 
-![](.\pics\c10_lstm_input_gate.png)
+![](pics\c10_lstm_input_gate.png)
 
 LSTM的输出hi(t)也可以由输出门(output gate) q(t)关闭：
 
-![](.\pics\c10_lstm_output.png)
+![](pics\c10_lstm_output.png)
 
 ### GRU
 
 GRU与LSTM的主要区别是，单个门控单元同时控制遗忘因子和更新状态单元的决定。更新公式如下：其中 u 代表 ‘‘更新’’ 门，r 表示 ‘‘复位’’ 门。
 
-![](.\pics\c10_gru.png)
+![](pics\c10_gru.png)
 
 围绕这两种架构的变种并没有特别明显的好的关键因素是**遗忘门**，而 Jozefowicz et al. (2015) 发现向 LSTM 遗忘门加入 1 的偏置(由 Gers et al. (2000) 提倡) 能让 LSTM 变得与已探索的最佳变种一样健壮。
 
-## 优化长期依赖*
+## 优化长期依赖
 
-### 截断梯度
+处理长期依赖的一种方法是设计工作在多个时间尺度的模型，使模型的某些部分在细粒度时间尺度上操作并能处理小细节，而其他部分在粗时间尺度上操作并能把遥远过去的信息更有效地传递过来。存在多种同时构建粗细时间尺度的策略。这些策略包括在时间轴增加**跳跃连接**，**“渗漏单元’’** 使用不同时间常数整合信号，并**去除**一些用于建模细粒度时间尺度的**连接**。
 
-### 引导信息流的正则化
+**截断梯度和引导信息流的正则化**
 
 ## 外显记忆*
 
