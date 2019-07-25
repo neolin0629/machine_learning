@@ -56,7 +56,7 @@ def to_supervised(train, n_input, n_out=7):
 		in_end = in_start + n_input
 		out_end = in_end + n_out
 		# ensure we have enough data for this instance
-		if out_end < len(data):
+		if out_end <= len(data):
 			X.append(data[in_start:in_end, :])
 			y.append(data[in_end:out_end, 0])
 		# move along one time step
